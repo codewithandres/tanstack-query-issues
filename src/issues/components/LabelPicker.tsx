@@ -1,12 +1,30 @@
+// ? Hook useLAbel
+import { LoaderSpiner } from '../../shared/components/loader';
+import { useLabel } from '../hooks/useLabel';
+
 export const LabelPicker = () => {
-  return (
-    <>
-      <span
-        className="px-2 py-1 rounded-full text-xs font-semibold hover:bg-slate-800 cursor-pointer"
-        style={{ border: `1px solid #ffccd3`, color: '#ffccd3' }}
-      >
-        Primary
-      </span>
-    </>
-  );
+	// ?  Obtener la funcion labelsQuery de nuestro custom kook
+	const { labelsQuery } = useLabel();
+
+	if (labelsQuery.isLoading) {
+		return (
+			<div className='flex justify-center items-center h-52 text-white'>
+				<LoaderSpiner />
+			</div>
+		);
+	}
+
+	return (
+		<section className='flex flex-wrap gap-2 items-center justify-center w-[100%]	p-2'>
+			{labelsQuery.data?.map(label => (
+				<span
+					key={label.id}
+					className='animate-fade-in  px-2 py-1 rounded-full text-xs font-semibold hover:bg-slate-800 cursor-pointer'
+					style={{ border: `1px solid #${label.color}`, color: `#${label.color}` }}
+				>
+					{label.name}
+				</span>
+			))}
+		</section>
+	);
 };

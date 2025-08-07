@@ -1,6 +1,9 @@
 import { FiInfo, FiMessageSquare, FiCheckCircle } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { GithubIssus, State } from '../interface/Issus.interface';
+import { useQueryClient } from '@tanstack/react-query';
+import { getIssue } from '../actions/get-issue';
+import { getIssueComments } from '../actions/get-issue-comment';
 
 declare interface Props {
 	isssue: GithubIssus;
@@ -9,8 +12,37 @@ declare interface Props {
 export const IssueItem = ({ isssue }: Props) => {
 	const navigate = useNavigate();
 
+	//? Obtiene una instancia del cliente de consulta para gestionar el caché y las consultas
+	const queryClinet = useQueryClient();
+
+	//? Función que pre-carga los datos del issue y sus comentarios cuando el usuario hace hover
+	const prefetchData = () => {
+		//? Pre-carga los datos básicos del issue
+		queryClinet.prefetchQuery({
+			queryKey: ['issus', isssue.number], //* Clave única para identificar la consulta
+			queryFn: () => getIssue(isssue.number), //* Función que obtiene los datos
+			staleTime: 1000 * 60 * 60, //* Tiempo en que los datos se consideran frescos (1 hora)
+		});
+
+		//? Pre-carga los comentarios del issue
+		queryClinet.prefetchQuery({
+			queryKey: ['issus', isssue.number, 'commets'], //* Clave única para los comentarios
+			queryFn: () => getIssueComments(isssue.number), //* Función que obtiene los comentarios
+			staleTime: 1000 * 60 * 60, //* Tiempo en que los datos se consideran frescos (1 hora)
+		});
+	};
+
+	const presetData = () => {
+		queryClinet.setQueryData(['issus', isssue.number], isssue, {
+			updatedAt: Date.now() + 1000 * 60 * 60, //* Actualiza el tiempo de los datos en caché
+		});
+	};
+
 	return (
-		<div className='animate-fade-in  flex items-center px-2 py-3 mb-5 border rounded-md bg-slate-900 hover:bg-slate-800'>
+		<div
+			onMouseEnter={presetData}
+			className='animate-fade-in  flex items-center px-2 py-3 mb-5 border rounded-md bg-slate-900 hover:bg-slate-800'
+		>
 			{isssue.state === State.Close ? (
 				<FiCheckCircle size={30} color='green' className='min-w-10' />
 			) : (

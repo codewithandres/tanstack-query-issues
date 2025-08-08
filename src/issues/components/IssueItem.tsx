@@ -4,6 +4,7 @@ import { GithubIssus, State } from '../interface/Issus.interface';
 import { useQueryClient } from '@tanstack/react-query';
 import { getIssue } from '../actions/get-issue';
 import { getIssueComments } from '../actions/get-issue-comment';
+import { timeSince } from '../../helpers/time-since';
 
 declare interface Props {
 	isssue: GithubIssus;
@@ -32,6 +33,9 @@ export const IssueItem = ({ isssue }: Props) => {
 		});
 	};
 
+	//? Función que establece los datos del issue directamente en el caché de React Query
+	//? Esto evita una nueva petición al servidor cuando se navega al detalle del issue
+	//? El updatedAt establece cuando los datos en caché se considerarán obsoletos (1 hora)
 	const presetData = () => {
 		queryClinet.setQueryData(['issus', isssue.number], isssue, {
 			updatedAt: Date.now() + 1000 * 60 * 60, //* Actualiza el tiempo de los datos en caché
@@ -57,9 +61,21 @@ export const IssueItem = ({ isssue }: Props) => {
 					{isssue.title}
 				</a>
 				<span className='text-gray-500'>
-					#{isssue.number} opened 2 days ago by
+					#{isssue.number} opened {timeSince(isssue.created_at)} ago by
 					<span className='font-bold'>{isssue.user.login}</span>
 				</span>
+
+				<div className='flex flex-wrap'>
+					{isssue.labels.map(label => (
+						<span
+							key={label.id}
+							className='px-2 my-2 py-1 text-xs text-white border rounded-full'
+							style={{ borderColor: label.color }}
+						>
+							{label.name}
+						</span>
+					))}
+				</div>
 			</div>
 
 			<img

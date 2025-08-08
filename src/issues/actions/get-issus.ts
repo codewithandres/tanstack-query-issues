@@ -8,7 +8,8 @@ import { GithubIssus, State } from '../interface/Issus.interface';
  */
 export const getIssus = async (
 	state: State,
-	selectedLabels: string[]
+	selectedLabels: string[],
+	page: number
 ): Promise<GithubIssus[]> => {
 	//* Añadir un retraso artificial de 1,5 segundos
 	await sleep(1500);
@@ -24,6 +25,9 @@ export const getIssus = async (
 	if (selectedLabels.length > 0) {
 		params.append('labels', selectedLabels.join(','));
 	}
+
+	params.append('page', `${page}`);
+	params.append('per_page', '5');
 
 	//* Realizar una llamada API al punto final de problemas de GitHub con el parámetro de estado.
 	//* Desestructurar la respuesta para obtener solo los datos.

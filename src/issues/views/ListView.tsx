@@ -11,7 +11,10 @@ export const ListView = () => {
 	const [state, setState] = useState<State>(State.All);
 	const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
 
-	const { issusQuery } = useIssus({ state: state, selectedLabels: selectedLabels });
+	const { issusQuery, page, nexPage, prePage } = useIssus({
+		state: state,
+		selectedLabels: selectedLabels,
+	});
 
 	const issues = issusQuery.data ?? [];
 
@@ -29,7 +32,24 @@ export const ListView = () => {
 				{issusQuery.isLoading ? (
 					<LoaderSpiner />
 				) : (
-					<IssueList onStateChange={setState} isssues={issues} state={state} />
+					<>
+						<IssueList onStateChange={setState} isssues={issues} state={state} />
+						<div className='flex justify-center items-center'>
+							<button
+								onClick={prePage}
+								className='p-2 bg-blue-500 rounded-md hover:bg-blue-700 transition-all'
+							>
+								prev
+							</button>
+							<span className='mx-4'>{page}</span>
+							<button
+								onClick={nexPage}
+								className='p-2 bg-blue-500 rounded-md hover:bg-blue-700 transition-all'
+							>
+								nex
+							</button>
+						</div>
+					</>
 				)}
 			</div>
 
